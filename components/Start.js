@@ -1,23 +1,14 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Button, TextInput, ImageBackground, TouchableOpacity } from 'react-native';
-import { getAuth, signInAnonymously} from 'firebase/auth';
+// Start.js
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet, View, Text, TextInput,
+  ImageBackground, TouchableOpacity, Alert
+} from 'react-native';
 
 const Start = ({ navigation }) => {
-  const auth = getAuth();
   const [name, setName] = useState('');
-  const [selectedColor, setSelectedColor] = useState();
-  const colorOptions = ["#090C08", "#474056", "#8A95A5", "#B9C6AE"];
-  const colorLabels = ["Black", "Purple", "Blue", "Green"];
-
-  const signInUser = () => {
-    signInAnonymously(auth).then(res => {
-        navigation.navigate("Chat", {userID: res.user.uid, name: name, backgroundColor: selectedColor});
-        Alert.alert("Signed in Successfully");
-    }).catch(err => {
-        Alert.alert("Unable to sign in, try later again");
-        console.log(err)
-    })
-}
+  const [backgroundColor, setBackgroundColor] = useState('');
+  const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE'];
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
@@ -25,131 +16,82 @@ const Start = ({ navigation }) => {
 
   return (
     <ImageBackground
-    style={styles.backgroundImage}
-      source={require("../assets/bgImage.png")}
+      style={styles.backgroundImage}
+      source={require('../assets/bgImage.png')}
       resizeMode="cover"
     >
-    <Text style={styles.title}>Chat App</Text>
-    <View style={styles.container}>
-      <TextInput
-        style={styles.textInput}
-        value={name}
-        onChangeText={setName}
-        placeholder='Your Name'
-      />
-       <View
-          style={styles.colorContainer}
-        >
+      <Text style={styles.title}>Chat App</Text>
+      <View style={styles.container}>
+        <TextInput
+          style={styles.textInput}
+          value={name}
+          onChangeText={setName}
+          placeholder="Your Name"
+        />
+
+        <View style={styles.colorContainer}>
           <Text style={styles.colorText}>Choose Background Color</Text>
-          <View
-            style={styles.colorButtonContainer}
-          >
-            {colorOptions.map((color, index) => (
+          <View style={styles.colorButtonContainer}>
+            {colorOptions.map(color => (
               <TouchableOpacity
-                key={`color-button__${color}`}
-                title="Got to Screen 2"
+                key={color}
                 style={[
                   styles.colorButton,
                   { backgroundColor: color },
-                  selectedColor === color && {
+                  backgroundColor === color && {
                     borderWidth: 2,
-                    borderColor: "#757083",
+                    borderColor: '#757083',
                   },
                 ]}
-                onPress={() => setSelectedColor(color)}
+                onPress={() => setBackgroundColor(color)}
               />
             ))}
           </View>
         </View>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              if (name == '') {
-                  Alert.alert('You need a username');
-              } else {
-                  signInUser();
-              }
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            if (!name) Alert.alert('You need a username');
+            else navigation.navigate('Chat', { name, backgroundColor });
           }}
-          >
-            <Text style={styles.buttonText}>Start Chatting</Text>
-          </TouchableOpacity>
-        </View>
-    </View>
+        >
+          <Text style={styles.buttonText}>Start Chatting</Text>
+        </TouchableOpacity>
+      </View>
     </ImageBackground>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1, width: '100%', height: '100%',
+    alignItems: 'center', justifyContent: 'space-evenly',
+  },
+  title: { fontSize: 45, fontWeight: '600', color: '#FFF' },
   container: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: "88%",
-    height: "44%",
-    backgroundColor: "#ffffff",
+    width: '88%', padding: 20,
+    backgroundColor: '#FFF', alignItems: 'center',
   },
   textInput: {
-    width: "88%",
-    padding: 15,
-    borderWidth: 1,
-    marginTop: 15,
-    marginBottom: 15
-  },
-  title: {
-    fontSize: 45,
-    fontWeight: "600",
-    color: "#ffffff",
-    height: "40%",
-  },
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "space-evenly",
+    width: '100%', borderWidth: 1,
+    padding: 15, marginBottom: 20,
   },
   colorContainer: {
-    flex: 5,
-    width: "88%",
-    justifyContent: "center",
-    alignItems: "flex-start",
+    width: '100%', marginBottom: 20,
   },
   colorText: {
-    fontSize: 16,
-    fontWeight: "300",
-    color: "#757083",
-    opacity: 1,
-    marginBottom: 20,
+    fontSize: 16, color: '#757083', marginBottom: 10,
   },
   colorButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
+    flexDirection: 'row', justifyContent: 'space-between',
   },
-  colorButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  buttonContainer: {
-    flex: 3,
-    width: "88%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  colorButton: { width: 50, height: 50, borderRadius: 25 },
   button: {
-    padding: 20,
-    backgroundColor: "#757083",
-    width: "100%",
+    width: '100%', padding: 20,
+    backgroundColor: '#757083', alignItems: 'center',
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-    color: "#ffffff",
-  },
+  buttonText: { fontSize: 16, color: '#FFF' },
 });
 
 export default Start;
