@@ -24,7 +24,7 @@ Getting Started
 
 Clone the repository
 
-git clone https://github.com/your-username/chat-app.git
+git clone https://github.com/stefv21/chat.git
 cd chat-app
 
 Install dependencies
