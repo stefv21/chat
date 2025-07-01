@@ -1,88 +1,159 @@
 // Chat.js
-import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, View, Platform, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  Platform,
+  KeyboardAvoidingView,
+  FlatList,
+  TextInput,
+  Button,
+  Text,
+} from 'react-native';
 
-
-// The Chat component displays a chat interface using GiftedChat
+// The Chat component displays a simple chat interface
 const Chat = ({ route, navigation }) => {
-  // Destructure name and backgroundColor from route parameters (with defaults)
-  const { name, backgroundColor } = route.params || { name: 'Chat', backgroundColor: '#fff' };
+  const { name = 'Chat', backgroundColor = '#fff' } = route?.params || {};
 
-  // State to hold all chat messages
-  const [messages, setMessages] = useState([]);
+  // Initial messages: system + user message
+  const [messages, setMessages] = useState([
+    {
+      id: '2',
+      text: 'You have entered the chat.',
+      system: true,
+    },
+    {
+      id: '1',
+      text: 'Hello developer',
+      user: { id: '2', name: 'React Native' },
+    },
+  ]);
+  const [input, setInput] = useState('');
 
-  // useEffect runs once when component mounts
   useEffect(() => {
-    // Set the navigation title to the user's chosen name
-    navigation.setOptions({ title: name });
+    navigation?.setOptions?.({ title: name });
+  }, []);
 
-    // Add two static messages to start: one from a user, one system message
-    setMessages([
+  // Send a new message
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    setMessages(prev => [
       {
-        _id: 1,
-        text: 'Hello developer', // user message
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any', // avatar image
-        },
+        id: Date.now().toString(),
+        text: input,
+        user: { id: '1', name: 'You' },
       },
-      {
-        _id: 2,
-        text: 'You have entered the chat.', // system message
-        createdAt: new Date(),
-        system: true,
-      },
+      ...prev,
     ]);
-  }, []);
+    setInput('');
+  };
 
-  // Function to handle sending new messages
-  // Appends new messages to the messages state
-  const onSend = useCallback((newMessages = []) => {
-    setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages));
-  }, []);
-
-  // Customizes the chat bubble appearance for left/right messages
-  const renderBubble = (props) => (
-    <Bubble
-      {...props}
-      wrapperStyle={{
-        right: { backgroundColor: '#000' },  // User message bubble
-        left: { backgroundColor: '#fff' },   // Other/user message bubble
-      }}
-    />
+  // Renders each message
+  const renderItem = ({ item }) => (
+    <View
+      style={[
+        styles.messageBubble,
+        item.system
+          ? styles.systemBubble
+          : item.user?.id === '1'
+          ? styles.myBubble
+          : styles.theirBubble,
+      ]}
+    >
+      <Text style={item.system ? styles.systemText : styles.messageText}>
+        {item.text}
+      </Text>
+      {item.user && !item.system && (
+        <Text style={styles.userName}>{item.user.name}</Text>
+      )}
+    </View>
   );
 
-  // Main render: wraps content in KeyboardAvoidingView to prevent keyboard overlap
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      // Adjusts view when keyboard is shown on iOS/Android
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      // Offset so input isn't hidden; tweak as needed for your app
       keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 90}
     >
-      {/* Main container for chat, uses dynamic background color */}
       <View style={[styles.container, { backgroundColor }]}>
-        {/* GiftedChat displays chat messages and handles input */}
-        <GiftedChat
-          messages={messages}              // feed messages from state
-          onSend={onSend}                  // handle sending messages
-          user={{ _id: 1 }}                // current user id
-          renderBubble={renderBubble}      // customize bubble appearance
+        <FlatList
+          data={messages}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          inverted
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
         />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Type a message"
+            onSubmitEditing={sendMessage}
+            returnKeyType="send"
+          />
+          <Button title="Send" onPress={sendMessage} />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 };
 
-// Styles for the chat container
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1 },
+  messageBubble: {
+    margin: 8,
+    padding: 10,
+    borderRadius: 10,
+    maxWidth: '80%',
+    alignSelf: 'flex-start',
+  },
+  myBubble: {
+    backgroundColor: '#DCF8C6',
+    alignSelf: 'flex-end',
+  },
+  theirBubble: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  systemBubble: {
+    backgroundColor: '#EEE',
+    alignSelf: 'center',
+  },
+  messageText: {
+    fontSize: 16,
+    color: '#222',
+  },
+  systemText: {
+    fontStyle: 'italic',
+    color: '#888',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  userName: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4,
+    textAlign: 'right',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 8,
+    backgroundColor: '#fafafa',
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    alignItems: 'center',
+  },
+  input: {
     flex: 1,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    marginRight: 8,
+    fontSize: 16,
   },
 });
 
-// Export Chat so it can be used in the app
 export default Chat;
