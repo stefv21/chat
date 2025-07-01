@@ -1,7 +1,7 @@
 // Chat.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, View, Platform, KeyboardAvoidingView } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+
 
 // The Chat component displays a chat interface using GiftedChat
 const Chat = ({ route, navigation }) => {
