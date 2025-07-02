@@ -1,18 +1,44 @@
 // Start.js
 import React, { useState, useEffect } from 'react';
 import {
-  StyleSheet, View, Text, TextInput,
-  ImageBackground, TouchableOpacity, Alert
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  ImageBackground,
+  TouchableOpacity,
+  Alert
 } from 'react-native';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
   const [backgroundColor, setBackgroundColor] = useState('');
   const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE'];
+  const auth = getAuth();
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
-  }, []);
+  }, [navigation]);
+
+  const handleStart = () => {
+    if (!name.trim()) {
+      Alert.alert('You need a username');
+      return;
+    }
+    signInAnonymously(auth)
+      .then(({ user }) => {
+        navigation.navigate('Chat', {
+          userId: user.uid,
+          name: name.trim(),
+          backgroundColor: backgroundColor || '#fff',
+        });
+      })
+      .catch(error => {
+        console.error('Anonymous sign-in failed:', error);
+        Alert.alert('Login failed', error.message);
+      });
+  };
 
   return (
     <ImageBackground
@@ -51,10 +77,7 @@ const Start = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => {
-            if (!name) Alert.alert('You need a username');
-            else navigation.navigate('Chat', { name, backgroundColor });
-          }}
+          onPress={handleStart}
         >
           <Text style={styles.buttonText}>Start Chatting</Text>
         </TouchableOpacity>
@@ -65,33 +88,57 @@ const Start = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   backgroundImage: {
-    flex: 1, width: '100%', height: '100%',
-    alignItems: 'center', justifyContent: 'space-evenly',
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
   },
-  title: { fontSize: 45, fontWeight: '600', color: '#FFF' },
+  title: {
+    fontSize: 45,
+    fontWeight: '600',
+    color: '#FFF',
+  },
   container: {
-    width: '88%', padding: 20,
-    backgroundColor: '#FFF', alignItems: 'center',
+    width: '88%',
+    padding: 20,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
   },
   textInput: {
-    width: '100%', borderWidth: 1,
-    padding: 15, marginBottom: 20,
+    width: '100%',
+    borderWidth: 1,
+    padding: 15,
+    marginBottom: 20,
   },
   colorContainer: {
-    width: '100%', marginBottom: 20,
+    width: '100%',
+    marginBottom: 20,
   },
   colorText: {
-    fontSize: 16, color: '#757083', marginBottom: 10,
+    fontSize: 16,
+    color: '#757083',
+    marginBottom: 10,
   },
   colorButtonContainer: {
-    flexDirection: 'row', justifyContent: 'space-between',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  colorButton: { width: 50, height: 50, borderRadius: 25 },
+  colorButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
   button: {
-    width: '100%', padding: 20,
-    backgroundColor: '#757083', alignItems: 'center',
+    width: '100%',
+    padding: 20,
+    backgroundColor: '#757083',
+    alignItems: 'center',
   },
-  buttonText: { fontSize: 16, color: '#FFF' },
+  buttonText: {
+    fontSize: 16,
+    color: '#FFF',
+  },
 });
 
 export default Start;
