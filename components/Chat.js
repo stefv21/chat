@@ -11,59 +11,74 @@ import {
   Text,
 } from 'react-native';
 
-// The Chat component displays a simple chat interface
-const Chat = ({ route, navigation }) => {
-  const { name = 'Chat', backgroundColor = '#fff' } = route?.params || {};
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
-  // Initial messages: system + user message
-  const [messages, setMessages] = useState([
-    {
-      id: '2',
-      text: 'You have entered the chat.',
-      system: true,
-    },
-    {
-      id: '1',
-      text: 'Hello developer',
-      user: { id: '2', name: 'React Native' },
-    },
-  ]);
+export default function Chat({ db, route, navigation }) {
+  const { name = 'Chat', backgroundColor = '#fff' } = route?.params || {};
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
 
+  // Set nav title & sign in + subscribe to Firestore
   useEffect(() => {
     navigation?.setOptions?.({ title: name });
-  }, []);
 
-  // Send a new message
-  const sendMessage = () => {
+    const auth = getAuth();
+    signInAnonymously(auth).catch(console.error);
+
+    const messagesRef = collection(db, 'messages');
+    const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(50));
+    const unsubscribe = onSnapshot(q, snap => {
+      const msgs = snap.docs.map(doc => {
+        const { text, createdAt, user } = doc.data();
+        return {
+          id: doc.id,
+          text,
+          createdAt: createdAt.toDate(),
+          user,
+        };
+      });
+      setMessages(msgs);
+    });
+
+    return () => unsubscribe();
+  }, [db, navigation, name]);
+
+  // Send into Firestore
+  const sendMessage = async () => {
     if (!input.trim()) return;
-    setMessages(prev => [
-      {
-        id: Date.now().toString(),
-        text: input,
-        user: { id: '1', name: 'You' },
-      },
-      ...prev,
-    ]);
+    const auth = getAuth();
+    await addDoc(collection(db, 'messages'), {
+      text: input,
+      createdAt: serverTimestamp(),
+      user: { id: auth.currentUser.uid, name: 'You' },
+    });
     setInput('');
   };
 
-  // Renders each message
   const renderItem = ({ item }) => (
     <View
       style={[
         styles.messageBubble,
-        item.system
+        item.user == null
           ? styles.systemBubble
-          : item.user?.id === '1'
+          : item.user.id === getAuth().currentUser.uid
           ? styles.myBubble
           : styles.theirBubble,
       ]}
     >
-      <Text style={item.system ? styles.systemText : styles.messageText}>
+      <Text style={item.user == null ? styles.systemText : styles.messageText}>
         {item.text}
       </Text>
-      {item.user && !item.system && (
+      {item.user && (
         <Text style={styles.userName}>{item.user.name}</Text>
       )}
     </View>
@@ -97,7 +112,7 @@ const Chat = ({ route, navigation }) => {
       </View>
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -155,5 +170,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default Chat;

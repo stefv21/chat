@@ -1,26 +1,26 @@
 // App.js
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import Chat from './Chat';  // adjust path if needed
 
-import Start from './components/Start';
-import Chat  from './components/Chat';
 
-const Stack = createNativeStackNavigator();
+const firebaseConfig = {
+  apiKey: "AIzaSyBUJLBenfALRtIBcYAOfIHmbdIGOcQYo78",
+  authDomain: "chat-4b65c.firebaseapp.com",
+  projectId: "chat-4b65c",
+  storageBucket: "chat-4b65c.firebasestorage.app",
+  messagingSenderId: "752625705370",
+  appId: "1:752625705370:web:d52be3d35ab01683529a23"
+};
+
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Start">
-        <Stack.Screen 
-          name="Start" 
-          component={Start} 
-        />
-        <Stack.Screen 
-          name="Chat" 
-          component={Chat}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    // pass the Firestore instance into Chat via props
+    <Chat db={db} />
   );
 }
