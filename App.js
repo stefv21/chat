@@ -2,7 +2,7 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import Chat from './Chat';  // adjust path if needed
+import Chat from './components/Chat';  // adjust path if needed
 
 
 const firebaseConfig = {

@@ -9,12 +9,13 @@ import {
   addDoc,
 } from 'firebase/firestore';
 import { getAuth, signInAnonymously } from 'firebase/auth';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 export default function Chat({ db, route, navigation }) {
   const {
     userId,            // extracted anonymous UID
     name,              // extracted user name
-    backgroundColor = '#fff'
+    backgroundColor = '#fff',
   } = route.params || {};
 
   const [messages, setMessages] = useState([]);
@@ -25,13 +26,10 @@ export default function Chat({ db, route, navigation }) {
     signInAnonymously(auth).catch(console.error);
 
     const messagesRef = collection(db, 'messages');
-    const messagesQuery = query(
-      messagesRef,
-      orderBy('createdAt', 'desc')
-    );
+    const messagesQuery = query(messagesRef, orderBy('createdAt', 'desc'));
 
-    const unsubscribe = onSnapshot(messagesQuery, snapshot => {
-      const fetched = snapshot.docs.map(doc => {
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const fetched = snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           _id: doc.id,
@@ -52,13 +50,20 @@ export default function Chat({ db, route, navigation }) {
   };
 
   return (
-    <GiftedChat
-      messages={messages}
-      onSend={onSend}
-      user={{ _id: userId, name }}   // use UID and name from route params
-      placeholder="Type your message..."
-      renderUsernameOnMessage
-      listViewProps={{ style: { backgroundColor } }}
-    />
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+    >
+      <View style={{ flex: 1 }}>
+        <GiftedChat
+          messages={messages}
+          onSend={onSend}
+          user={{ _id: userId, name }}
+          placeholder="Type your message..."
+          renderUsernameOnMessage
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 }
