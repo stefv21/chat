@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 
+
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
   const [backgroundColor, setBackgroundColor] = useState('');

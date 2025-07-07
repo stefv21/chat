@@ -6,9 +6,8 @@ import {
   query,
   orderBy,
   onSnapshot,
-  addDoc,
+  addDoc,          
 } from 'firebase/firestore';
-import { getAuth, signInAnonymously } from 'firebase/auth';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 export default function Chat({ db, route, navigation }) {
@@ -19,13 +18,11 @@ export default function Chat({ db, route, navigation }) {
   } = route.params || {};
 
   const [messages, setMessages] = useState([]);
-  const auth = getAuth();
 
   useEffect(() => {
     navigation.setOptions({ title: 'Chat' });
-    signInAnonymously(auth).catch(console.error);
 
-    const messagesRef = collection(db, 'messages');
+    const messagesRef   = collection(db, 'messages');
     const messagesQuery = query(messagesRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
@@ -42,10 +39,11 @@ export default function Chat({ db, route, navigation }) {
     });
 
     return () => unsubscribe();
-  }, [db, navigation, auth]);
+  }, [db, navigation]);
 
   // Save sent messages to Firestore
-  const onSend = (newMessages = []) => {
+  const onSend = (newMessages) => {
+    // ONLY this line in onSend:
     addDoc(collection(db, 'messages'), newMessages[0]);
   };
 
