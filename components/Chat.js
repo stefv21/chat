@@ -1,29 +1,32 @@
 // Chat.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { GiftedChat } from 'react-native-gifted-chat';
 import {
   collection,
   query,
   orderBy,
   onSnapshot,
-  addDoc,          
+  addDoc,
 } from 'firebase/firestore';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 export default function Chat({ db, route, navigation }) {
-  const {
-    userId,            // extracted anonymous UID
-    name,              // extracted user name
-    backgroundColor = '#fff',
-  } = route.params || {};
+  // Destructure route params without fallback to avoid re-renders
+  const { userId, name, backgroundColor = '#fff' } = route.params;
 
   const [messages, setMessages] = useState([]);
 
-  useEffect(() => {
+  // Set header title once, without triggering re-renders
+  useLayoutEffect(() => {
     navigation.setOptions({ title: 'Chat' });
+  }, [navigation]);
 
-    const messagesRef   = collection(db, 'messages');
-    const messagesQuery = query(messagesRef, orderBy('createdAt', 'desc'));
+  // Real-time listener for messages, only re-run when `db` changes
+  useEffect(() => {
+    const messagesQuery = query(
+      collection(db, 'messages'),
+      orderBy('createdAt', 'desc')
+    );
 
     const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
       const fetched = snapshot.docs.map((doc) => {
@@ -38,13 +41,15 @@ export default function Chat({ db, route, navigation }) {
       setMessages(fetched);
     });
 
-    return () => unsubscribe();
-  }, [db, navigation]);
+    return unsubscribe;
+  }, [db]);
 
   // Save sent messages to Firestore
   const onSend = (newMessages) => {
-    // ONLY this line in onSend:
-    addDoc(collection(db, 'messages'), newMessages[0]);
+    addDoc(
+      collection(db, 'messages'),
+      newMessages[0]
+    );
   };
 
   return (
