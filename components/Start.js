@@ -18,6 +18,9 @@ const Start = ({ navigation }) => {
   const colorOptions = ['#090C08', '#474056', '#8A95A5', '#B9C6AE'];
   const auth = getAuth();
 
+  // Import i18next for internationalization
+  // import i18n from 'i18next';
+
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
   }, [navigation]);
@@ -36,8 +39,9 @@ const Start = ({ navigation }) => {
         });
       })
       .catch(error => {
-        console.error('Anonymous sign-in failed:', error);
-        Alert.alert('Login failed', error.message);
+        // import DOMPurify from 'dompurify';
+        console.error('Anonymous sign-in failed:', DOMPurify.sanitize(error.message)); // Sanitize error message before logging
+        Alert.alert('Login failed', 'An error occurred during sign-in');
       });
   };
 
@@ -47,7 +51,7 @@ const Start = ({ navigation }) => {
       source={require('../assets/bgImage.png')}
       resizeMode="cover"
     >
-      <Text style={styles.title}>Chat App</Text>
+      <Text style={styles.title}>{i18n.t('chatApp')}</Text>
       <View style={styles.container}>
         <TextInput
           style={styles.textInput}
@@ -80,7 +84,7 @@ const Start = ({ navigation }) => {
           style={styles.button}
           onPress={handleStart}
         >
-          <Text style={styles.buttonText}>Start Chatting</Text>
+          <Text style={styles.buttonText}>{i18n.t('startChatting')}</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>

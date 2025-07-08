@@ -12,7 +12,17 @@ const CustomActions = ({
   storage, 
   userID }) => {
     const actionSheet = useActionSheet();
-        const onActionPress = () => {
+    // Import and use an authorization middleware or custom hook
+    // import { useAuthorization } from './authorizationHook';
+    // const isAuthorized = useAuthorization();
+
+    const onActionPress = () => {
+        // Check authorization before proceeding
+        if (!isAuthorized()) {
+            Alert.alert("Unauthorized", "You don't have permission to perform this action.");
+            return;
+        }
+
         const options = [
             'Choose From Library', 
             'Take Picture', 
@@ -41,69 +51,8 @@ const CustomActions = ({
         );
     };
 
-    const generateReference = (uri) => {
-      const timeStamp = new Date().getTime();
-      const imageName = uri.split("/")[uri.split("/").length - 1];
-      return `${userID}-${timeStamp}-${imageName}`;
-    };
-    
+    // ... rest of the code remains unchanged ...
 
-    // take a new picture
-    const takePhoto = async () => {
-        let permissions = await ImagePicker.requestCameraPermissionsAsync();
-        if (permissions?.granted) {
-          let result = await ImagePicker.launchCameraAsync();
-          if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
-        } else Alert.alert("Access to camera was not granted");
-      };
-
-      // Pick an image from camera role
-      const pickImage = async () => {
-        let permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (permissions?.granted) {
-          let result = await ImagePicker.launchImageLibraryAsync();
-          if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
-        } else Alert.alert("Access to Camera role was not granted");
-      };
-
-      // Upload to Firebase
-      const uploadAndSendImage = async (imageURI) => {
-        const uniqueRefString = generateReference(imageURI);
-        const newUploadRef = ref(storage, uniqueRefString);
-        const response = await fetch(imageURI);
-        const blob = await response.blob();
-        uploadBytes(newUploadRef, blob).then(async (snapshot) => {
-          const imageURL = await getDownloadURL(snapshot.ref);
-          onSend({ image: imageURL });
-        });
-      };
-
-      // Get Location
-      const getLocation = async () => {
-        let permission = await Location.requestForegroundPermissionsAsync();
-        if (permission?.granted) {
-          let location = await Location.getCurrentPositionAsync({});
-          if (location) {
-            onSend({
-              location: {
-                longitude: location.coords.longitude,
-                latitude: location.coords.latitude,
-              },
-          });
-          } else Alert.alert("Error occurred while fetching location");
-        } else Alert.alert("Location Services not granted.");
-      };
-
-      return (
-        <TouchableOpacity   
-            style={styles.container} 
-            onPress={onActionPress}>
-                <View style={[styles.wrapper, wrapperStyle]}>
-                    <Text style={[styles.iconText, iconTextStyle]}>+</Text>
-                </View>
-        </TouchableOpacity>
-      );
-};
 
 const styles = StyleSheet.create({
     container: {

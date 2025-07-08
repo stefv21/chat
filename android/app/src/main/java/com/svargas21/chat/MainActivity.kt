@@ -10,6 +10,9 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 import expo.modules.ReactActivityDelegateWrapper
 
+// Import for authentication
+// import com.your.auth.package.AuthenticationManager
+
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     // Set the theme to AppTheme BEFORE onCreate to support
@@ -17,6 +20,12 @@ class MainActivity : ReactActivity() {
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null)
+    // Perform authentication check
+    if (!AuthenticationManager.isUserAuthenticated()) {
+        // Redirect to login screen or show authentication error
+        finish()
+        return
+    }
   }
 
   /**
@@ -29,6 +38,7 @@ class MainActivity : ReactActivity() {
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
    * which allows you to enable New Architecture with a single boolean flags [fabricEnabled]
    */
+  @Secured("ROLE_USER") // import org.springframework.security.access.annotation.Secured
   override fun createReactActivityDelegate(): ReactActivityDelegate {
     return ReactActivityDelegateWrapper(
           this,

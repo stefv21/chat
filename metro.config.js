@@ -1,3 +1,4 @@
+// Import the required module at the top of the file
 const { getDefaultConfig } = require('@expo/metro-config');
 
 const defaultConfig = getDefaultConfig(__dirname);

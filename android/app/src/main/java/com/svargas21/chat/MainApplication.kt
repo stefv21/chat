@@ -40,6 +40,8 @@ class MainApplication : Application(), ReactApplication {
   override val reactHost: ReactHost
     get() = ReactNativeHostWrapper.createReactHost(applicationContext, reactNativeHost)
 
+  // import androidx.annotation.RequiresPermission
+  @RequiresPermission(allOf = [android.Manifest.permission.INTERNET])
   override fun onCreate() {
     super.onCreate()
     SoLoader.init(this, OpenSourceMergedSoMapping)

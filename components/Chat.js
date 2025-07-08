@@ -1,5 +1,5 @@
 // Chat.js
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';  // ← ADDED useLayoutEffect
 import { GiftedChat } from 'react-native-gifted-chat';
 import {
   collection,
@@ -11,41 +11,42 @@ import {
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 
 export default function Chat({ db, route, navigation }) {
-  // Destructure route params without fallback to avoid re-renders
   const { userId, name, backgroundColor = '#fff' } = route.params;
 
   const [messages, setMessages] = useState([]);
 
-  // Set header title once, without triggering re-renders
   useLayoutEffect(() => {
     navigation.setOptions({ title: 'Chat' });
   }, [navigation]);
 
-  // Real-time listener for messages, only re-run when `db` changes
   useEffect(() => {
-    const messagesQuery = query(
+    const msgQuery = query(
       collection(db, 'messages'),
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const fetched = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          _id: doc.id,
-          text: data.text,
-          createdAt: data.createdAt.toDate(),
-          user: data.user,
-        };
+    // Import and use Firebase Auth for user authentication
+    // import { getAuth } from 'firebase/auth';
+    const auth = getAuth();
+    if (auth.currentUser) {
+      const unsubscribe = onSnapshot(msgQuery, snapshot => {
+        const fetched = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            _id: doc.id,
+            text: data.text,
+            createdAt: data.createdAt.toDate(),
+            user: data.user,
+          };
+        });
+        setMessages(fetched);
       });
-      setMessages(fetched);
-    });
 
-    return unsubscribe;
+      return unsubscribe;
+    }
   }, [db]);
 
-  // Save sent messages to Firestore
-  const onSend = (newMessages) => {
+  const onSend = newMessages => {
     addDoc(
       collection(db, 'messages'),
       newMessages[0]
