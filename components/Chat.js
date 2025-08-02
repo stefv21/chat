@@ -2,7 +2,7 @@ import { addDoc, collection, onSnapshot, query, orderBy } from 'firebase/firesto
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
-import MapView from 'react-native-maps';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CustomActions from './CustomActions';
@@ -88,28 +88,8 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
       {...props} />;
   };
 
-  const renderCustomView = (props) => {
-    const { currentMessage } = props;
-    if (currentMessage.location) {
-      return (
-        <MapView
-          style={{
-            width: 150,
-            height: 100,
-            borderRadius: 13,
-            margin: 3
-          }}
-          region={{
-            latitude: currentMessage.location.latitude,
-            longitude: currentMessage.location.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-        />
-      );
-    }
-    return null;
-  }
+
+
 
   return (
     <View style={[styles.container, { backgroundColor: color }]}>
@@ -119,7 +99,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
         renderInputToolbar={renderInputToolbar}
         onSend={onSend}
         renderActions={renderCustomActions}
-        renderCustomView={renderCustomView}
+        
         user={{
           _id: userID,
           name
