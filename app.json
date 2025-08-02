@@ -1,5 +1,6 @@
 {
   "expo": {
+   "platforms": ["ios", "android"],
     "name": "chat",
     "slug": "chat",
     "version": "1.0.0",
@@ -22,9 +23,6 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.svargas21.chat"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }

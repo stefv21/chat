@@ -14,6 +14,9 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
   let unsubMessages;
 
   useEffect(() => {
+    console.log("Firestore db is:", db);
+
+
     navigation.setOptions({ title: name });
     if (isConnected === true) {
       if (unsubMessages) unsubMessages();
@@ -52,16 +55,11 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     }
   }
 
-  const onSend = async (newMessages) => {
-    console.log('onSend in Chat.js called with:', newMessages);
-    try {
-      await addDoc(collection(db, "messages"), newMessages[0]);
-      console.log('Message sent to Firestore successfully!');
-    } catch (error) {
-      console.error('Error sending message to Firestore:', error);
-      // Optionally, display an error message to the user
-    }
-  }
+  const onSend = (newMessages = []) => {
+  // Persist just the first message object directly
+  addDoc(collection(db, 'messages'), newMessages[0]);
+};
+
 
   const renderInputToolbar = (props) => {
     if (isConnected === true) return <InputToolbar {...props} />;
@@ -119,7 +117,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
         messages={messages}
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
-        onSend={messages => onSend(messages)}
+        onSend={onSend}
         renderActions={renderCustomActions}
         renderCustomView={renderCustomView}
         user={{
