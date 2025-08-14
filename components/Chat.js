@@ -2,21 +2,21 @@ import { addDoc, collection, onSnapshot, query, orderBy } from 'firebase/firesto
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import CustomActions from './CustomActions';
 
-const Chat = ({ route, navigation, db, isConnected, storage }) => {
+const Chat = ({ route, navigation, db, isConnected }) => {
   const { name, color, userID } = route.params;
   const [messages, setMessages] = useState([]);
 
   let unsubMessages;
 
+const renderCustomActions = (props) => {
+  return <CustomActions {...props} />;
+  };
+
+  
   useEffect(() => {
-    console.log("Firestore db is:", db);
-
-
     navigation.setOptions({ title: name });
     if (isConnected === true) {
       if (unsubMessages) unsubMessages();
@@ -43,7 +43,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
   }, [isConnected]);
 
   const loadCachedMessages = async () => {
-    const cachedMessages = await AsyncStorage.getItem("messages") || [];
+    const cachedMessages = await AsyncStorage.getItem("messages") || "[]";
     setMessages(JSON.parse(cachedMessages));
   };
 
@@ -56,10 +56,8 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
   }
 
   const onSend = (newMessages = []) => {
-  // Persist just the first message object directly
-  addDoc(collection(db, 'messages'), newMessages[0]);
-};
-
+    addDoc(collection(db, 'messages'), newMessages[0]);
+  };
 
   const renderInputToolbar = (props) => {
     if (isConnected === true) return <InputToolbar {...props} />;
@@ -71,7 +69,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
       {...props}
       wrapperStyle={{
         right: {
-          backgroundColor: "#000" // Customize bubble colors
+          backgroundColor: "#000"
         },
         left: {
           backgroundColor: "#FFF"
@@ -79,17 +77,6 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
       }}
     />
   }
-
-  const renderCustomActions = (props) => {
-    return <CustomActions
-      userID={userID}
-      storage={storage}
-      onSend={onSend} // Make sure this is the correct onSend function from Chat.js
-      {...props} />;
-  };
-
-
-
 
   return (
     <View style={[styles.container, { backgroundColor: color }]}>
@@ -99,11 +86,11 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
         renderInputToolbar={renderInputToolbar}
         onSend={onSend}
         renderActions={renderCustomActions}
-        
         user={{
           _id: userID,
           name
         }}
+       
       />
       {Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null}
     </View>
