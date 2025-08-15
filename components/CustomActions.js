@@ -41,7 +41,8 @@ const onActionPress = () => {
 
   const generateReference = (uri) => {
     const timeStamp = (new Date()).getTime();
-    const imageName = uri.split("/")[uri.split("/").length - 1];
+    const uriParts = uri.split("/");
+    const imageName = uriParts[uriParts.length - 1];
     return `${userID}-${timeStamp}-${imageName}`;
   }
 
@@ -92,7 +93,14 @@ const onActionPress = () => {
   }
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onActionPress}>
+    <TouchableOpacity 
+      style={styles.container} 
+      onPress={onActionPress}
+      accessible={true}
+      accessibilityLabel="More options"
+      accessibilityHint="Opens action sheet with options to send images or location"
+      accessibilityRole="button"
+    >
       <View style={[styles.wrapper, wrapperStyle]}>
         <Text style={[styles.iconText, iconTextStyle]}>+</Text>
       </View>

@@ -4,6 +4,13 @@ import { getAuth, signInAnonymously } from "firebase/auth";
 
 const auth = getAuth();
 
+// Internationalization constants
+const strings = {
+  title: "Let's Chat!",
+  backgroundColorLabel: "Choose Background Color:",
+  buttonTitle: "Go to Chat"
+};
+
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(''); // State to hold the selected color
@@ -29,7 +36,7 @@ const Start = ({ navigation }) => {
       style={styles.image}
     >
       <View style={styles.container}>
-        <Text style={styles.title}>Let's Chat!</Text>
+        <Text style={styles.title}>{strings.title}</Text>
         <View style={styles.box}>
           <TextInput
             style={styles.textInput}
@@ -38,7 +45,7 @@ const Start = ({ navigation }) => {
             placeholder='Your Name'
           />
           <View>
-            <Text style={styles.backgroundColor}>Choose Background Color:</Text>
+            <Text style={styles.backgroundColor}>{strings.backgroundColorLabel}</Text>
           </View>
           <View style={styles.colorOptions}>
             <TouchableOpacity
@@ -59,7 +66,7 @@ const Start = ({ navigation }) => {
             />
           </View>
           <Button
-            title="Go to Chat"
+            title={strings.buttonTitle}
             onPress={signInUser}
           />
         </View>
