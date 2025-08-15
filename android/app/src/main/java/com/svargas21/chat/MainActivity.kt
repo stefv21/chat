@@ -21,8 +21,14 @@ class MainActivity : ReactActivity() {
     setTheme(R.style.AppTheme);
     super.onCreate(null)
     // Perform authentication check
-    if (!AuthenticationManager.isUserAuthenticated()) {
-        // Redirect to login screen or show authentication error
+    try {
+        if (!AuthenticationManager.isUserAuthenticated()) {
+            // Redirect to login screen or show authentication error
+            finish()
+            return
+        }
+    } catch (e: Exception) {
+        // Handle authentication check failure
         finish()
         return
     }

@@ -4,13 +4,19 @@ import * as Location from 'expo-location';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage }) => {
+const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, userID }) => {
 const actionSheet = useActionSheet();
 
 const onActionPress = () => {
-const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
-const cancelButtonIndex = options.length - 1;
-actionSheet.showActionSheetWithOptions(
+    // Authorization check
+    if (!userID) {
+      Alert.alert("Unauthorized", "You must be logged in to use this feature.");
+      return;
+    }
+    
+    const options = ['Choose From Library', 'Take Picture', 'Send Location', 'Cancel'];
+    const cancelButtonIndex = options.length - 1;
+    actionSheet.showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
@@ -25,26 +31,48 @@ actionSheet.showActionSheetWithOptions(
             return;
           case 2:
             getLocation();
+            return;
           default:
+            break;
         }
       },
     );
   };
 
+  const generateReference = (uri) => {
+    const timeStamp = (new Date()).getTime();
+    const imageName = uri.split("/")[uri.split("/").length - 1];
+    return `${userID}-${timeStamp}-${imageName}`;
+  }
+
+  const uploadAndSendImage = async (imageURI) => {
+    try {
+      const uniqueRefString = generateReference(imageURI);
+      const newUploadRef = ref(storage, uniqueRefString);
+      const response = await fetch(imageURI);
+      const blob = await response.blob();
+      uploadBytes(newUploadRef, blob).then(async (snapshot) => {
+        const imageURL = await getDownloadURL(snapshot.ref)
+        onSend({ image: imageURL })
+      });
+    } catch (error) {
+      Alert.alert("Upload Error", "Failed to upload image. Please try again.");
+    }
+  }
+
   const pickImage = async () => {
     let permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissions?.granted) {
       let result = await ImagePicker.launchImageLibraryAsync();
-      if (!result.canceled) {
-        const imageURI = result.assets[0].uri;
-        const response = await fetch(imageURI);
-        const blob = await response.blob();
-        const newUploadRef = ref(storage, 'image123');
-        uploadBytes(newUploadRef, blob).then(async (snapshot) => {
-          console.log('File has been uploaded successfully');
-        }) 
-      }
-      else Alert.alert("Permissions haven't been granted.");
+      if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
+    }
+  }
+
+  const takePhoto = async () => {
+    let permissions = await ImagePicker.requestCameraPermissionsAsync();
+    if (permissions?.granted) {
+      let result = await ImagePicker.launchCameraAsync();
+      if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
     }
   }
 

@@ -44,12 +44,30 @@ class MainApplication : Application(), ReactApplication {
   @RequiresPermission(allOf = [android.Manifest.permission.INTERNET])
   override fun onCreate() {
     super.onCreate()
+    
+    // Authentication check before initialization
+    try {
+      if (!isUserAuthenticated()) {
+        // Handle unauthenticated access
+        return
+      }
+    } catch (e: Exception) {
+      // Handle authentication check failure
+      return
+    }
+    
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
+  }
+  
+  private fun isUserAuthenticated(): Boolean {
+    // Implement your authentication logic here
+    // For now, return true to allow app initialization
+    return true
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {

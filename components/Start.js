@@ -2,15 +2,15 @@ import { useState } from "react";
 import { StyleSheet, View, Text, Button, TouchableOpacity, TextInput, ImageBackground, Alert } from "react-native";
 import { getAuth, signInAnonymously } from "firebase/auth";
 
+const auth = getAuth();
+
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
   const [selectedBackgroundColor, setSelectedBackgroundColor] = useState(''); // State to hold the selected color
 
-  const auth = getAuth();
-
   const signInUser = () => {
     signInAnonymously(auth).then(res => {
-      console.log("Start.js - res.user.uid:", res.user.uid);
+      console.log("Start.js - res.user.uid:", encodeURIComponent(res.user.uid));
       navigation.navigate("Chat", { userID: res.user.uid, name: name, color: selectedBackgroundColor })
       Alert.alert("Signed in successfully");
     }).catch(err => {

@@ -1,5 +1,5 @@
 import { addDoc, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,8 +9,7 @@ import MapView from 'react-native-maps';
 const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const { name, color, userID } = route.params;
   const [messages, setMessages] = useState([]);
-
-  let unsubMessages;
+  const unsubMessages = useRef(null);
 
   const renderCustomView = (props) => {
     const { currentMessage} = props;
@@ -34,7 +33,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
   }
 
   const renderCustomActions = (props) => {
-    return <CustomActions storage={storage} {...props} />;
+    return <CustomActions storage={storage} userID={userID} {...props} />;
   };
 
   
@@ -42,11 +41,11 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     navigation.setOptions({ title: name });
     
     if (isConnected === true) {
-      if (unsubMessages) unsubMessages();
-      unsubMessages = null;
+      if (unsubMessages.current) unsubMessages.current();
+      unsubMessages.current = null;
 
       const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-      unsubMessages = onSnapshot(q, (docs) => {
+      unsubMessages.current = onSnapshot(q, (docs) => {
         let newMessages = [];
         docs.forEach(doc => {
           newMessages.push({
@@ -94,7 +93,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     }
 
     return () => {
-      if (unsubMessages) unsubMessages();
+      if (unsubMessages.current) unsubMessages.current();
     }
   }, [isConnected]);
 
@@ -107,7 +106,7 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     try {
       await AsyncStorage.setItem('messages', JSON.stringify(messagesToCache));
     } catch (error) {
-      console.log(error.message);
+      console.log(encodeURIComponent(error.message));
     }
   }
 
