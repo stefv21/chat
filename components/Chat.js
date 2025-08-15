@@ -4,6 +4,7 @@ import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
 const Chat = ({ route, navigation, db, isConnected }) => {
   const { name, color, userID } = route.params;
@@ -11,13 +12,35 @@ const Chat = ({ route, navigation, db, isConnected }) => {
 
   let unsubMessages;
 
-const renderCustomActions = (props) => {
-  return <CustomActions {...props} />;
+  const renderCustomView = (props) => {
+    const { currentMessage} = props;
+    if (currentMessage.location) {
+      return (
+          <MapView
+            style={{width: 150,
+              height: 100,
+              borderRadius: 13,
+              margin: 3}}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+          />
+      );
+    }
+    return null;
+  }
+
+  const renderCustomActions = (props) => {
+    return <CustomActions {...props} />;
   };
 
   
   useEffect(() => {
     navigation.setOptions({ title: name });
+    
     if (isConnected === true) {
       if (unsubMessages) unsubMessages();
       unsubMessages = null;
@@ -32,10 +55,43 @@ const renderCustomActions = (props) => {
             createdAt: new Date(doc.data().createdAt.toMillis())
           })
         })
+        
+        // Add system messages if no messages exist
+        if (newMessages.length === 0) {
+          newMessages = [
+            {
+              _id: 1,
+              text: 'My message',
+              createdAt: new Date(Date.UTC(2016, 5, 11, 17, 20, 0)),
+              user: {
+                _id: 2,
+                name: 'React Native',
+                avatar: 'https://facebook.github.io/react-native/img/header_logo.png',
+              },
+              image: 'https://facebook.github.io/react-native/img/header_logo.png',
+            },
+            {
+              _id: 2,
+              createdAt: new Date(),
+              user: {
+                _id: 2,
+                name: 'React Native',
+                avatar: 'https://placeimg.com/140/140/any',
+              },
+              location: {
+                latitude: 48.864601,
+                longitude: 2.398704,
+              },
+            }
+          ];
+        }
+        
         cacheMessages(newMessages);
         setMessages(newMessages);
       })
-    } else loadCachedMessages();
+    } else {
+      loadCachedMessages();
+    }
 
     return () => {
       if (unsubMessages) unsubMessages();
@@ -86,6 +142,7 @@ const renderCustomActions = (props) => {
         renderInputToolbar={renderInputToolbar}
         onSend={onSend}
         renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
         user={{
           _id: userID,
           name
