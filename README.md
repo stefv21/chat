@@ -1,6 +1,6 @@
 Chat App
 
-A simple React Native chat application built with Expo. This project demonstrates a basic start screen (enter name + choose background color) and a chat screen placeholder, showcasing cross-platform native UI components.
+A fully functional React Native chat application built with Expo and Firebase. This project features real-time messaging, image sharing, location sharing, offline message caching, and user authentication.
 
 Why Native vs. Web?
 
@@ -12,30 +12,35 @@ This chat app uses React Native + Expo to maintain one codebase for both platfor
 
 Prerequisites
 
-Node.js (v16.19.0)
-
-npm or yarn
-
-Expo CLI (local via npx expo)
-
-Expo Go app on your device, or Android Studio / Xcode Simulator
+• Node.js (v16.19.0 or higher)
+• npm or yarn
+• Expo CLI (local via npx expo)
+• Expo Go app on your device, or Android Studio / Xcode Simulator
+• Firebase project with Firestore and Storage enabled
 
 Getting Started
 
-Clone the repository
-
+1. Clone the repository
+```bash
 git clone https://github.com/stefv21/chat.git
-cd chat-app
+cd chat
+```
 
-Install dependencies
-
+2. Install dependencies
+```bash
 npm install
-# or
-yarn install
+```
 
-Start the Expo server
+3. Set up Firebase
+   - Create a Firebase project
+   - Enable Firestore Database
+   - Enable Storage
+   - Update `.env` file with your Firebase config
 
+4. Start the Expo server
+```bash
 npx expo start --clear
+```
 
 Run on device or emulator
 
@@ -47,33 +52,51 @@ iOS Simulator: Press i in the terminal (macOS only).
 
 Project Structure
 
-chat-app/
-├── App.js           # Navigation setup (Start & Chat)
-├── index.js         # Expo entry point
+```
+chat/
+├── App.js                    # Navigation setup & Firebase integration
+├── index.js                  # Expo entry point
+├── firebaseConfig.js         # Firebase configuration
+├── .env                      # Environment variables
 ├── components/
-│   ├── Start.js     # Start screen (name + color picker)
-│   └── Chat.js      # Chat screen placeholder
+│   ├── Start.js             # Start screen (name + color picker)
+│   ├── Chat.js              # Real-time chat with GiftedChat
+│   └── CustomActions.js     # Image picker & location sharing
 ├── assets/
-│   └── bgImage.png  # Background image for start screen
-└── README.md        # This file
+│   ├── Background-Image.png # Background image for start screen
+│   └── [other images]       # App icons and images
+├── android/                 # Android-specific files
+└── README.md               # This file
+```
 
 Core Dependencies
 
-react-native & expo
+• **React Native & Expo** - Cross-platform framework
+• **Firebase** - Backend services (Firestore, Storage, Auth)
+• **React Navigation** - Navigation between screens
+• **GiftedChat** - Chat UI components
+• **AsyncStorage** - Offline message caching
+• **Expo Image Picker** - Camera and photo library access
+• **Expo Location** - GPS location sharing
+• **NetInfo** - Network connectivity detection
 
-@react-navigation/native & @react-navigation/native-stack
+Features
 
-No additional native modules are required for this exercise.
+• **Real-time messaging** - Send and receive messages instantly
+• **Image sharing** - Take photos or choose from library
+• **Location sharing** - Share your current location
+• **Offline support** - Messages cached locally when offline
+• **Custom backgrounds** - Choose chat background color
+• **User authentication** - Secure user identification
+• **Cross-platform** - Works on iOS and Android
 
 Usage
 
-Enter your name on the start screen.
-
-Choose a background color.
-
-Tap Start Chatting to navigate to the chat screen.
-
-Observe your name in the header and the selected background color.
+1. Enter your name on the start screen
+2. Choose a background color
+3. Tap "Start Chatting" to enter the chat room
+4. Send messages, images, or location
+5. Messages sync across all devices in real-time
 
 Recording a Demo
 

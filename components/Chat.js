@@ -1,10 +1,10 @@
 import { addDoc, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomActions from './CustomActions';
-import MapView from 'react-native-maps';
+
 
 const Chat = ({ route, navigation, db, isConnected, storage }) => {
   const { name, color, userID } = route.params;
@@ -15,18 +15,11 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
     const { currentMessage} = props;
     if (currentMessage.location) {
       return (
-          <MapView
-            style={{width: 150,
-              height: 100,
-              borderRadius: 13,
-              margin: 3}}
-            region={{
-              latitude: currentMessage.location.latitude,
-              longitude: currentMessage.location.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-          />
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationText}>
+            📍 Location: {currentMessage.location.latitude.toFixed(4)}, {currentMessage.location.longitude.toFixed(4)}
+          </Text>
+        </View>
       );
     }
     return null;
@@ -156,6 +149,20 @@ const Chat = ({ route, navigation, db, isConnected, storage }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  locationContainer: {
+    width: 150,
+    height: 100,
+    borderRadius: 13,
+    margin: 3,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  locationText: {
+    fontSize: 12,
+    textAlign: 'center',
+    padding: 10,
   }
 });
 

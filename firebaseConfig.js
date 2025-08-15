@@ -30,25 +30,18 @@ const firebaseConfig = {
   appId: FIREBASE_APP_ID
 };
 
-let app, auth, db, storage;
+// Initialize the Firebase App
+const app = initializeApp(firebaseConfig);
 
-try {
-  // Initialize the Firebase App
-  app = initializeApp(firebaseConfig);
-  
-  // Initialize Auth with AsyncStorage-based persistence
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage)
-  });
-  
-  // Initialize Firestore
-  db = getFirestore(app);
-  
-  // Initialize Storage
-  storage = getStorage(app);
-} catch (error) {
-  console.error('Firebase initialization failed:', error.message);
-  throw new Error('Failed to initialize Firebase services');
-}
+// Initialize Auth with AsyncStorage-based persistence
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 
-export { auth, db, storage };
+// Initialize Firestore
+const db = getFirestore(app);
+
+// Initialize Storage
+const storage = getStorage(app);
+
+export { app, auth, db, storage };
