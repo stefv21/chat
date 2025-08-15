@@ -2,6 +2,9 @@ package com.svargas21.chat
 
 import android.app.Application
 import android.content.res.Configuration
+import android.content.SharedPreferences
+import android.util.Log
+import androidx.annotation.RequiresPermission
 
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -40,20 +43,13 @@ class MainApplication : Application(), ReactApplication {
   override val reactHost: ReactHost
     get() = ReactNativeHostWrapper.createReactHost(applicationContext, reactNativeHost)
 
-  // import androidx.annotation.RequiresPermission
-  @RequiresPermission(allOf = [android.Manifest.permission.INTERNET])
   override fun onCreate() {
     super.onCreate()
     
     // Authentication check before initialization
-    try {
-      if (!isUserAuthenticated()) {
-        // Handle unauthenticated access
-        return
-      }
-    } catch (e: Exception) {
-      // Handle authentication check failure
-      return
+    if (!isUserAuthenticated()) {
+      Log.e("MainApplication", "Authentication failed - terminating application")
+      throw SecurityException("Authentication required")
     }
     
     SoLoader.init(this, OpenSourceMergedSoMapping)
@@ -65,9 +61,9 @@ class MainApplication : Application(), ReactApplication {
   }
   
   private fun isUserAuthenticated(): Boolean {
-    // Implement your authentication logic here
-    // For now, return true to allow app initialization
-    return true
+    val prefs: SharedPreferences = getSharedPreferences("auth", MODE_PRIVATE)
+    val token = prefs.getString("auth_token", null)
+    return !token.isNullOrEmpty()
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
